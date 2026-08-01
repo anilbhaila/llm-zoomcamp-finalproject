@@ -21,4 +21,4 @@ Thus, we added, persistant_rag_ingest.ipynb to ingest the data and index it.
 
 Then, we added, persistant_rag.ipynb to accept user query, and execute our rag to get answer from llm.
 
-
+Created and agent that will search and retry search feeding its previous results until valid answer is found. If answer is not found, it will not try to answer by itself rather response it could not find the answer.
