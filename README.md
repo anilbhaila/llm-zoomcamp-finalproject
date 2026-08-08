@@ -59,3 +59,33 @@ So, you need to change the version of requests=2.28.1 in pyproject.toml
 
 Then run below command again:
 $uv add psycopg[binary]
+
+# Monitoring
+
+Add below dependency:
+$uv add streamlit
+
+Add below Postgres configs in .env file:
+POSTGRES_DB=ecommerce_chatbot 
+POSTGRES_USER=user 
+POSTGRES_PASSWORD=password 
+POSTGRES_HOST=postgres 
+OPENAI_API_KEY=your-key-here
+
+Run below docker command to start postgres:
+$docker run -it \
+    --name ecommerce_chatbot-pg \
+    -e POSTGRES_USER=user \
+    -e POSTGRES_PASSWORD=password \
+    -e POSTGRES_DB=ecommerce_chatbot \
+    -v pgdata:/var/lib/postgresql/data \
+    -p 5432:5432 \
+    pgvector/pgvector:pg17
+
+Created a Make file and added below frequently used commands:
+make run:
+	uv run python scripts/assistant.py
+
+init-db:
+	uv run python scripts/db_init.py
+
