@@ -89,3 +89,46 @@ make run:
 init-db:
 	uv run python scripts/db_init.py
 
+
+Steps to run the Ecommerce Chatbot application:
+# Add .env file in the root folder. And add below code:
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_DB=ecommerce_chatbot
+OPENAI_API_KEY=Your-OpenAI-API-Key
+
+Execute Below docker command to run postgres, grafana and Ecommerce Chatbot Streamlit app.
+$docker compose up
+
+$make init-db  (to initialize postgres database)
+
+Streamlit Application can be reachable at: http://localhost:8501/
+Grafana can be rechable at: http://127.0.0.1:3000/
+
+After you successfully run grafana enter below credentials:
+username: admin
+password: admin
+
+Then add Postgres Datasource:
+Click Connections => Add new Connection
+
+Host URL: postgres:5432
+Database name: ecommerce_chatbot
+
+Username:user
+Password:password
+
+TLS/SSL Mode: disable
+
+Then click: Save & test
+
+Now inside app/ folder, there is graphana-dashboard.json, import this json file into graphana to load the dashboard.
+
+Near Search bar, click + button => Import dashboard => Upload dashboard JSON file.
+
+That's it.
+
+Dashboard will be blank with no data. 
+So, run below command to generate synthetic data:
+
+$make live-data (to generate synthetic data for live monitoring in Grafana Dashboard)
