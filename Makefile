@@ -1,11 +1,11 @@
 make run:
-	uv run python assistant.py
+	uv run python app/assistant.py
 
 dashboard:
-	uv run streamlit run dashboard.py
+	uv run streamlit run app/dashboard.py
 
 chat:
-	uv run streamlit run app.py
+	uv run streamlit run app/app.py
 
 network:
 	@docker network ls | grep -q "monitoring" || docker network create monitoring
@@ -24,8 +24,10 @@ postgres: network
     pgvector/pgvector:pg17
 
 init-db:
-	uv run python db_init.py
+	uv run python app/db_init.py
 
 query:
-	uv run python db_query.py
+	uv run python app/db_query.py
 
+live-data:
+	uv run python app/generate_data.py
