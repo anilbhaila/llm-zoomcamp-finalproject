@@ -1,6 +1,37 @@
 version: '3.8'
 
 services:
+  mage:
+    command: mage start ${PROJECT_NAME}
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile.mage
+    environment:
+      - USER_CODE_PATH=/home/src/${PROJECT_NAME}
+      - ENV=${ENV:-development}
+    ports:
+      - 6789:6789
+    volumes:
+      - .:/home/src/
+    restart: on-failure:5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    restart: always
+
   postgres:
     image: postgres:17
     environment:

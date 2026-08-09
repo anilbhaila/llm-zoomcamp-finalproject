@@ -132,3 +132,30 @@ Dashboard will be blank with no data.
 So, run below command to generate synthetic data:
 
 $make live-data (to generate synthetic data for live monitoring in Grafana Dashboard)
+
+
+Run Elastic Search:
+docker run -it --name elasticsearch \
+  -p 9200:9200 \
+  -p 9300:9300 \
+  -e "discovery.type=single-node" \
+  -e "xpack.security.enabled=false" \
+  -e "ES_JAVA_OPTS=-Xms1g -Xmx1g" \
+  docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+
+
+Run Magicai 
+docker run -it --name mage \
+-e REQUIRE_USER_AUTHENTICATION=0 \
+-p 6789:6789 \
+-v $(pwd):/home/src \
+mageai/mageai:latest \
+mage start ecommarce_chatbot
+
+Username: admin@admin.com
+Password: admin
+
+
+Magicai added to docker-compose.yml file.
+
+$docker compose up  (will run all services, mage, postgres, elastic search, grafana, streamlit)
