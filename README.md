@@ -159,3 +159,10 @@ Password: admin
 Magicai added to docker-compose.yml file.
 
 $docker compose up  (will run all services, mage, postgres, elastic search, grafana, streamlit)
+
+Note:
+I have created graphana dashboard manually and exported as code (json). I placed this json code into Git hub. This same JSON is used to recreate Dashboard in Grafana Automatically via Python Code.
+
+After you create, Grafana Datasource and Dashboard from Python code, you need to click Save&Test in Grafana UI in Datasource to make it work.
+
+
