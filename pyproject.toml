@@ -5,11 +5,15 @@ description = "This is my final Project."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "elasticsearch>=8,<9",
+    "matplotlib>=3.11.1",
     "minsearch>=0.2.0",
     "openai>=2.48.0",
     "psycopg[binary]>=3.3.4",
     "python-dotenv>=1.2.2",
     "requests>=2.34.2",
+    "seaborn>=0.13.2",
+    "spacy>=3.8.15",
     "streamlit>=1.60.0",
 ]
 

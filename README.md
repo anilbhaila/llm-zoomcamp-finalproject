@@ -152,6 +152,8 @@ docker run -it --name mage \
 mageai/mageai:latest \
 mage start ecommarce_chatbot
 
+
+Mage can be reachable at: http://localhost:6789
 Username: admin@admin.com
 Password: admin
 
@@ -164,5 +166,23 @@ Note:
 I have created graphana dashboard manually and exported as code (json). I placed this json code into Git hub. This same JSON is used to recreate Dashboard in Grafana Automatically via Python Code.
 
 After you create, Grafana Datasource and Dashboard from Python code, you need to click Save&Test in Grafana UI in Datasource to make it work.
+
+
+To do experiment in elasticsearch, add elastic search library in uv
+
+$uv add elasticsearch (caused version mis-match)
+$uv add "elasticsearch>=8,<9"
+
+$uv add spacy  (For embeddings)
+
+import en_core_web_sm is not working in notebook.
+
+$uv run python -m spacy download en_core_web_sm
+
+Now we will be able to load package via spacy.load('en_core_web_sm')
+
+
+$uv add matplotlib (For result evaluation)
+$uv add seaborn
 
 

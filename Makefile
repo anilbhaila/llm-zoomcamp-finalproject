@@ -31,3 +31,6 @@ query:
 
 live-data:
 	uv run python app/generate_data.py
+
+trigger-pipeline:
+	uv run python populate_elasticsearch.py

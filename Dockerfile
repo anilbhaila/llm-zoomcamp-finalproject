@@ -11,3 +11,4 @@ RUN uv sync --locked
 COPY . .
 
 CMD ["streamlit", "run", "app/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["uv","run","python","populate_elasticsearch.py"]

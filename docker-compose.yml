@@ -26,6 +26,8 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
     deploy:
       resources:
         limits:
@@ -67,8 +69,12 @@ services:
     ports:
       - "8501:8501"
     depends_on:
+      - grafana
       - postgres
+      - mage
+      - elasticsearch
 
 volumes:
   postgres_data:
   grafana_data:
+  es_data:

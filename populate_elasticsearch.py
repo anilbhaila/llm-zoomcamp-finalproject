@@ -12,6 +12,8 @@ import random
 from dotenv import load_dotenv
 import socket
 
+
+
 DB_TIMEZONE = datetime.now().astimezone().tzinfo
 print(f"Using timezone: {DB_TIMEZONE}")
 
@@ -26,7 +28,6 @@ PG_DB = os.getenv("POSTGRES_DB")
 GRAFANA_URL = os.getenv("GRAFANA_URL")
 GRAFANA_USER = os.getenv("GRAFANA_ADMIN_USER")
 GRAFANA_PASSWORD = os.getenv("GRAFANA_ADMIN_PASSWORD")
-
 
 ########################################################
 ####### Functions for checking services
@@ -85,7 +86,7 @@ def is_mage_ready():
         print(f"Error connecting to Mage service: {e}")
         return False
 
-def wait_for_services(max_retries=12):  # 12 * 5 seconds = 1 minute total wait time
+def wait_for_services(max_retries=12):  # 12 * 50 seconds = 10 minute total wait time
     retries = 0
     while retries < max_retries:
         if is_elasticsearch_ready() and is_mage_ready() and is_grafana_ready():
@@ -93,7 +94,7 @@ def wait_for_services(max_retries=12):  # 12 * 5 seconds = 1 minute total wait t
             return True
         else:
             print(f"Attempt {retries + 1}/{max_retries}: Services not ready. Waiting 5 seconds...")
-            time.sleep(5)
+            time.sleep(50)
             retries += 1
     print("Max retries reached. Services are not ready.")
     return False
@@ -124,205 +125,17 @@ def run_pipeline_populate_elasticsearch():
     finally:
         print("!----> Script execution completed magic.", flush=True)
 
-########################################################
-####### Functions for Postgres: 
-########################################################
-
-def get_db_connection():
-    host = os.getenv("POSTGRES_HOST")
-
-    if not host:
-        try:
-            socket.getaddrinfo("postgres", None)
-            host = "postgres"
-        except socket.gaierror:
-            # Fallback to local machine if Docker network host isn't found
-            host = "localhost"
-
-    try:
-        return psycopg.connect(
-            host=host,
-            dbname=os.getenv("POSTGRES_DB", "ecommerce_chatbot"),
-            user=os.getenv("POSTGRES_USER", "user"),
-            password=os.getenv("POSTGRES_PASSWORD", "password"),
-            connect_timeout=5
-        )
-    except OperationalError as e:
-        print(f"Error: Could not connect to the PostgreSQL database.\nDetails: {e}")
-        return None
-
-def init_db(drop=False):
-    conn = get_db_connection()
-    if conn is None:
-        print("Database connection failed.")
-        return
-    try:
-        with conn.cursor() as cur:
-            if drop:
-                cur.execute("DROP TABLE IF EXISTS feedback")
-                cur.execute("DROP TABLE IF EXISTS conversations")
-                
-
-            cur.execute("""
-                CREATE TABLE conversations (
-                    id SERIAL PRIMARY KEY,
-                    question TEXT NOT NULL,
-                    answer TEXT NOT NULL,
-                    model TEXT NOT NULL,
-                    instructions TEXT NOT NULL,
-                    prompt TEXT NOT NULL,
-                    prompt_tokens INTEGER NOT NULL,
-                    completion_tokens INTEGER NOT NULL,
-                    total_tokens INTEGER NOT NULL,
-                    response_time FLOAT NOT NULL,
-                    cost FLOAT NOT NULL,
-                    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
-                )
-            """)
-
-            cur.execute("""
-                CREATE TABLE feedback (
-                    id SERIAL PRIMARY KEY,
-                    conversation_id INTEGER REFERENCES conversations(id),
-                    source TEXT NOT NULL,
-                    relevance TEXT,
-                    explanation TEXT,
-                    score INTEGER,
-                    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
-                )
-            """)
-
-        conn.commit()
-        print("Database initialization completed successfully.")
-
-        # Verify table creation by querying information_schema
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT table_name FROM information_schema.tables 
-                WHERE table_schema = 'public'
-            """)
-            tables = cur.fetchall()
-            print("Tables in the database:", tables)
-    except DatabaseError as e:
-        print(f"Database error: {e}")
-        conn.rollback()  # Rollback in case of error
-
-    finally:
-        if conn:
-            conn.close()
-            print("Database connection closed.")
-
-def save_conversation(record, question):
-    timestamp = datetime.now(DB_TIMEZONE)
-
-    conn = get_db_connection()
-    if conn is None:
-        print("Database connection failed.")
-        return
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO conversations (
-                    question, answer, model, instructions, prompt,
-                    prompt_tokens, completion_tokens, total_tokens,
-                    response_time, cost, timestamp
-                ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                )
-                RETURNING id
-                """,
-                (
-                    question,
-                    record.answer,
-                    record.model,
-                    record.instructions,
-                    record.prompt,
-                    record.prompt_tokens,
-                    record.completion_tokens,
-                    record.total_tokens,
-                    record.response_time,
-                    record.cost,
-                    timestamp,
-                ),
-            )
-            conversation_id = cur.fetchone()[0]
-        conn.commit()
-    except DatabaseError as e:
-            print(f"Database error: {e}")
-            conn.rollback()  # Rollback in case of error
-    finally:
-        if conn:
-            conn.close()
-
-    return conversation_id
-
-def save_feedback(conversation_id, source, relevance=None,
-                  explanation=None, score=None):
-    timestamp = datetime.now(DB_TIMEZONE)
-
-    conn = get_db_connection()
-    if conn is None:
-        print("Database connection failed.")
-        return
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO feedback (
-                    conversation_id, source, relevance,
-                    explanation, score, timestamp
-                ) VALUES (
-                    %s, %s, %s, %s, %s, %s
-                )
-                """,
-                (conversation_id, source, relevance,
-                 explanation, score, timestamp),
-            )
-        conn.commit()
-    except DatabaseError as e:
-        print(f"Database error: {e}")
-        conn.rollback()  # Rollback in case of error
-
-    finally:
-        if conn:
-            conn.close()
-
-def clear_tables():
-    conn = get_db_connection()
-    if conn is None:
-        print("Database connection failed.")
-        return
-
-    try:
-        with conn.cursor() as cur:
-            cur.execute("DELETE FROM feedback")  # Clear the 'feedback' table first due to foreign key constraint
-            cur.execute("DELETE FROM conversations")   # Then clear the 'conversations' table
-        conn.commit()
-        print("All entries in 'conversations' and 'feedback' tables have been deleted.")
-    except DatabaseError as e:
-        print(f"Error deleting records from tables: {e}")
-        conn.rollback()
-    finally:
-        if conn:
-            conn.close()
-
-##############################################################
-####### Functions to generate Fake Data for Grafana Dashboard 
-##############################################################
-
-
-
-
-
 ###############################################################################################
 ####### Functions for Grafana: create_api_key, create_or_update_datasource, create_dashboard
 ##############################################################################################
+
+auth = (GRAFANA_USER, GRAFANA_PASSWORD)
+headers = {"Content-Type": "application/json"}
+
 def get_or_create_service_account_token():
     
-    auth = (GRAFANA_USER, GRAFANA_PASSWORD)
-    headers = {"Content-Type": "application/json"}
-
+    #auth = (GRAFANA_USER, GRAFANA_PASSWORD)
+    
     account_payload = {
         "name": "ProgrammaticServiceAccount",
         "role": "Admin",  # Options: Viewer, Editor, Admin
@@ -437,17 +250,12 @@ def create_or_update_datasource(access_token):
         print(f"Failed to create or update datasource: {response.text}")
         return None
 
-def create_dashboard(access_token, datasource_uid):
+def create_dashboard(access_token, datasource_uid, dashboard_file):
+    
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
-
-    if is_localhost:
-        dashboard_file = "../app/graphana-dashboard.json"
-    else:
-        dashboard_file = "graphana-dashboard.json"
-
     try:
         with open(dashboard_file, "r") as f:
             dashboard_json = json.load(f)
@@ -516,3 +324,44 @@ def create_dashboard(access_token, datasource_uid):
     else:
         print(f"Failed to create dashboard: {response.text}")
         return None
+
+
+if __name__ == "__main__":
+
+    load_dotenv()
+
+    #Check services
+
+    if not wait_for_services():
+        print("Exiting script as services are not ready.")
+        sys.exit(1)
+
+    # Trigger pipeline in mage.ai
+
+    run_pipeline_populate_elasticsearch()
+
+    # Create Graphana Dashboard
+    
+    access_token = get_or_create_service_account_token()
+    if not access_token:
+        print("access_token creation failed")
+
+    datasource_uid = create_or_update_datasource(access_token)
+    if not datasource_uid:
+        print("Datasource creation failed")
+
+    dashboard_file = "grafana-dashboard.json"
+    
+    try:
+        socket.getaddrinfo("elasticsearch", None)
+        #Running in outside of docker container
+        dashboard_file = "app/graphana-dashboard.json"
+    except socket.gaierror:
+        # Fallback to local machine if Docker network host isn't found
+        host = "localhost"
+        is_localhost = True
+        #Running inside of docker container
+        dashboard_file = "app/graphana-dashboard.json"
+
+    print(dashboard_file)
+    create_dashboard(access_token, datasource_uid, dashboard_file)
