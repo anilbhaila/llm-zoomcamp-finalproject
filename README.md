@@ -232,3 +232,11 @@ Error will show as below:
 
 
 To resolve this issue downgraded requests==2.28.1 in pyproject.toml
+
+
+Codespace disk was very low, so elastic search indexing was stuck and throws error.
+So, run below commands to clean some space:
+$docker system prune -a --volumes --force
+$uv cache clean
+
+freed some space and indexing worked.
