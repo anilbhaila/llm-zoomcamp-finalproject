@@ -1,13 +1,25 @@
 import os
 import psycopg
 from datetime import datetime
+import socket
 
 DB_TIMEZONE = datetime.now().astimezone().tzinfo
 print(f"Using timezone: {DB_TIMEZONE}")
 
+def get_postgres_host():
+    try:
+        socket.getaddrinfo("postgres", None)
+        host = "postgres"
+    except socket.gaierror:
+        # Fallback to local machine if Docker network host isn't found
+        host = "localhost"
+    
+    return host 
+
 def get_db_connection():
+    dynamic_host = get_postgres_host()
     return psycopg.connect(
-        host=os.getenv("POSTGRES_HOST", "localhost"),
+        host=dynamic_host,
         dbname=os.getenv("POSTGRES_DB", "ecommerce_chatbot"),
         user=os.getenv("POSTGRES_USER", "user"),
         password=os.getenv("POSTGRES_PASSWORD", "password"),

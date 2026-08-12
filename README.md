@@ -3,6 +3,7 @@ Final Project for llm-zoomcamp-2026 course.
 
 $pip install uv
 $uv init
+$uv sync
 
 Libraries needed
 $uv add minsearch python-dotenv toyaikit openai requests sqlitesearch toyaikit jupyter
@@ -67,10 +68,22 @@ $uv add streamlit
 
 Add below Postgres configs in .env file:
 POSTGRES_DB=ecommerce_chatbot 
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
 POSTGRES_USER=user 
 POSTGRES_PASSWORD=password 
 POSTGRES_HOST=postgres 
 OPENAI_API_KEY=your-key-here
+
+GRAFANA_ADMIN_USER=admin@admin.com
+GRAFANA_ADMIN_PASSWORD=admin
+
+MAGE_TRIGGER_URL=Your-Pipleline-Trigger-url
+
+Open the Mage UI, go to your pipeline, click the Triggers tab, find your API trigger, and copy the new Token/cURL string. Paste that new value into your .env file
+example:http://127.0.0.1:6789/api/pipeline_schedules/1/pipeline_runs/4c11159a05a246939d631299f86f96b5
+
+Note: this needs to be create everytime fresh docker image is build.
 
 Run below docker command to start postgres:
 $docker run -it \
@@ -92,6 +105,7 @@ init-db:
 
 Steps to run the Ecommerce Chatbot application:
 # Add .env file in the root folder. And add below code:
+POSTGRES_VERSION=1700
 POSTGRES_USER=user
 POSTGRES_PASSWORD=password
 POSTGRES_DB=ecommerce_chatbot
@@ -185,4 +199,36 @@ Now we will be able to load package via spacy.load('en_core_web_sm')
 $uv add matplotlib (For result evaluation)
 $uv add seaborn
 
+We will be commenting elasticsearch volume in docker-compose.yml because codespace is running out of space and elasticsearch docker was unable to start.
+#volumes:
+#  - es_data:/usr/share/elasticsearch/data
 
+So, this will not save our embeddings into disk and will be erased everytime we restart elasticsearch docker.
+
+ISSUE: mage is not detecting my pipeline.
+$docker compose down -v
+$docker compose build --no-cache
+$docker compose up
+
+
+Spacy Embedding is not good in embeddings
+
+So, to use "sentense-transformers" add below code to pyproject.toml
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+
+And in terminal execute below command:
+$uv add sentence-transformers
+
+Error will show as below:
+× No solution found when resolving dependencies for split (markers: python_full_version >= '3.14' and sys_platform
+  │ == 'win32'):
+  ╰─▶ Because only requests==2.28.1 is available and your project depends on requests>=2.34.2, we can conclude that
+      your project's requirements are unsatisfiable.
+
+
+To resolve this issue downgraded requests==2.28.1 in pyproject.toml

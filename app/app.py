@@ -1,13 +1,19 @@
 import streamlit as st
-from assistant import create_assistant
+from assistant_with_elasticsearch import create_assistant
 from db_save import save_conversation
 from judge import evaluate_relevance
 from db_feedback import save_feedback
 
-assistant = create_assistant()
 
 st.title("Ecommerce Chatbot")
 
+# Sidebar
+st.sidebar.header("Settings")
+
+# Search type  selection
+search_type = st.sidebar.selectbox("Select Search type", ["text", "vector", "hybrid"])
+assistant = create_assistant(search_type)
+    
 user_input = st.text_input("Enter your question:")
 
 if st.button("Ask"):

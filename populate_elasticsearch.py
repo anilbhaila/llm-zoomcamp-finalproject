@@ -25,7 +25,6 @@ PG_USER = os.getenv("POSTGRES_USER")
 PG_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 PG_DB = os.getenv("POSTGRES_DB")
 
-GRAFANA_URL = os.getenv("GRAFANA_URL")
 GRAFANA_USER = os.getenv("GRAFANA_ADMIN_USER")
 GRAFANA_PASSWORD = os.getenv("GRAFANA_ADMIN_PASSWORD")
 
@@ -60,6 +59,7 @@ def is_grafana_ready():
         host = "localhost"
     try:
         url = f'http://{host}:3000'
+        GRAFANA_URL = url
         print(url)
 
         response = requests.get(url, timeout=5)
@@ -107,7 +107,9 @@ def run_pipeline_populate_elasticsearch():
     """
     chunking, lammetizing, embedding and indexing data into elastic search via mage pipeline
     """
-    url = "http://127.0.0.1:6789/api/pipeline_schedules/1/pipeline_runs/60ac297fd34a457991914d00c79c6a42"
+    url = os.getenv("MAGE_TRIGGER_URL")
+
+    #url = "http://127.0.0.1:6789/api/pipeline_schedules/1/pipeline_runs/4c11159a05a246939d631299f86f96b5"
     
     headers = {
         "Content-Type": "application/json"
@@ -132,9 +134,16 @@ def run_pipeline_populate_elasticsearch():
 auth = (GRAFANA_USER, GRAFANA_PASSWORD)
 headers = {"Content-Type": "application/json"}
 
+try:
+    socket.getaddrinfo("grafana", None)
+    grafana_host = "grafana"
+except socket.gaierror:
+    # Fallback to local machine if Docker network host isn't found
+    grafana_host = "localhost"
+
+GRAFANA_URL = f"http://{grafana_host}:3000"
+
 def get_or_create_service_account_token():
-    
-    #auth = (GRAFANA_USER, GRAFANA_PASSWORD)
     
     account_payload = {
         "name": "ProgrammaticServiceAccount",
@@ -327,8 +336,6 @@ def create_dashboard(access_token, datasource_uid, dashboard_file):
 
 
 if __name__ == "__main__":
-
-    load_dotenv()
 
     #Check services
 

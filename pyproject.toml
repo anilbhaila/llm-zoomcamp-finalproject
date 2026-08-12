@@ -11,8 +11,9 @@ dependencies = [
     "openai>=2.48.0",
     "psycopg[binary]>=3.3.4",
     "python-dotenv>=1.2.2",
-    "requests>=2.34.2",
+    "requests>=2.28.1",
     "seaborn>=0.13.2",
+    "sentence-transformers>=5.7.0",
     "spacy>=3.8.15",
     "streamlit>=1.60.0",
 ]
@@ -21,3 +22,10 @@ dependencies = [
 dev = [
     "jupyter>=1.1.1",
 ]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
