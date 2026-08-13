@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
-
+from sentence_transformers import SentenceTransformer
 from ingest import load_faq_data, build_index
 from rag_with_elasticsearch import RAGWithElasticSearch
 from db_save import save_conversation
@@ -14,6 +14,9 @@ import spacy
 import numpy as np
 import socket
 import requests
+
+st = SentenceTransformer("all-MiniLM-L6-v2")
+nlp = spacy.load('en_core_web_sm')
 
 def get_elasticsearch_url():
     try:
@@ -34,13 +37,16 @@ def get_elasticsearch_url():
         print(f"Error connecting to Elasticsearch service: {e}")
         return None   
 
-def create_assistant(search_type="text"):
+def create_assistant(search_type="text",embedder_type="Spacy"):
     load_dotenv()
 
-    nlp = spacy.load('en_core_web_sm')
+    embedder = nlp
+    if embedder_type=="SentenceTransformer":
+        embedder=st
+
     es_client = Elasticsearch(get_elasticsearch_url())
     return RAGWithElasticSearch(
-        embedder=nlp,
+        embedder=embedder,
         search_client=es_client,
         search_type=search_type,
         llm_client=OpenAI(),

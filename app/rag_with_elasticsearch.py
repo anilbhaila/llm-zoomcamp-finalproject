@@ -5,6 +5,7 @@ from datetime import datetime
 from rag_helper import RAGBase
 
 from elasticsearch import Elasticsearch
+from sentence_transformers import SentenceTransformer
 
 import spacy
 import numpy as np
@@ -61,6 +62,9 @@ class RAGWithElasticSearch(RAGBase):
         return response
     
     def get_vector(self,query):
+        if(isinstance(self.embedder,SentenceTransformer)):
+            return self.embedder.encode(query)
+
         doc = self.embedder(query)
         tokens = [token.lemma_ for token in doc]
         text = ' '.join(tokens)
@@ -69,18 +73,23 @@ class RAGWithElasticSearch(RAGBase):
         return vector
 
     def search(self, query, num_results=5):
+        index_name="documents_specy"
+        if(isinstance(self.embedder,SentenceTransformer)):
+            index_name = "documents_st"
+
         if self.search_type == 'text':
-            search_results = self._elastic_search_text(query)
+            search_results = self._elastic_search_text(query,index_name)
         elif self.search_type == 'vector':
-            search_results = self._elastic_search_knn(query)
+            search_results = self._elastic_search_knn(query,index_name)
         elif self.search_type == 'hybrid':
-            search_results = self._elastic_search_hybrid(query)
+            search_results = self._elastic_search_hybrid(query,index_name)
         
         return search_results
 
 
-    
-    def _elastic_search_text(self, query, index_name="documents", num_results=5):
+    def _elastic_search_text(self, query, index_name, num_results=5):
+        
+
         search_query = {
             "size": num_results,
             "query": {
@@ -99,7 +108,7 @@ class RAGWithElasticSearch(RAGBase):
         response = self.search_client.search(index=index_name, body=search_query)
         return [hit["_source"] for hit in response["hits"]["hits"]]
 
-    def _elastic_search_knn(self,query,index_name="documents", num_results=5):
+    def _elastic_search_knn(self,query,index_name, num_results=5):
         vector = self.get_vector(query)
 
         search_body = {
@@ -117,7 +126,7 @@ class RAGWithElasticSearch(RAGBase):
 
         return [hit["_source"] for hit in es_results["hits"]["hits"]]
 
-    def _elastic_search_hybrid(self,query,index_name="documents", num_results=5):
+    def _elastic_search_hybrid(self,query,index_name, num_results=5):
         vector = self.get_vector(query)
     
         knn_query = {
