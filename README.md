@@ -240,3 +240,4 @@ $docker system prune -a --volumes --force
 $uv cache clean
 
 freed some space and indexing worked.
+$df -h /workspaces  (To check the disk space of codespaces)

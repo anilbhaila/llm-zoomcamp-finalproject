@@ -12,7 +12,8 @@ st.sidebar.header("Settings")
 
 # Search type  selection
 search_type = st.sidebar.selectbox("Select Search type", ["text", "vector", "hybrid"])
-assistant = create_assistant(search_type)
+embedder_type = st.sidebar.selectbox("Select Embedder type", ["Spacy", "SentenceTransformer"])
+assistant = create_assistant(search_type,embedder_type)
     
 user_input = st.text_input("Enter your question:")
 

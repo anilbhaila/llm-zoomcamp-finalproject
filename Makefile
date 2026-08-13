@@ -34,3 +34,6 @@ live-data:
 
 trigger-pipeline:
 	uv run python populate_elasticsearch.py
+
+trigger-offline-pipeline:
+	uv run python app/pipeline_offline.py
