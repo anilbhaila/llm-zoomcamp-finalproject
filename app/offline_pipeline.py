@@ -11,7 +11,7 @@ import socket
 import json
 
 from sentence_transformers import SentenceTransformer
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 def load_data(*args, **kwargs):
     """
@@ -70,7 +70,7 @@ def transformToAddChunk(data: pd.DataFrame, *args, **kwargs):
             'document_id': document_id,
         })
 
-    print(f'Documents: {len(documents)}')
+    print(f'Chuncked Documents len: {len(documents)}')
 
     return documents
 
@@ -81,7 +81,7 @@ def transformToAddTokensBySpacyNLP(documents: List[Dict], *args, **kwargs):
     Template code for a transformer block to Lemmatize.
     """
     count = len(documents)
-    print('Documents', count)
+    print('Tokens added to Documents by SpacyNLP count:', count)
 
     nlp = spacy.load('en_core_web_sm')
     
@@ -90,7 +90,7 @@ def transformToAddTokensBySpacyNLP(documents: List[Dict], *args, **kwargs):
     for idx, document in enumerate(documents):
         document_id = document['document_id']
         if idx % 100 == 0:
-            print(f'{idx + 1}/{count}')
+            print(f'adding chunk to {idx + 1}/{count}')
 
         # Process the text chunk using spacy
         chunk = document['chunk']
@@ -107,12 +107,12 @@ def transformToAddTokensBySpacyNLP(documents: List[Dict], *args, **kwargs):
             )
         )
 
-    print('\nData', len(data))
+    print('\nReturned Data len ', len(data))
 
     return data
 
 
-def transformToAddEmbeddingBySpecy(documents: List[Dict], *args, **kwargs) ->List[Dict]:
+def transformToAddEmbeddingBySpacy(documents: List[Dict], *args, **kwargs) ->List[Dict]:
     """
     Template code for a transformer block to create embeddings.
     """
@@ -125,7 +125,7 @@ def transformToAddEmbeddingBySpecy(documents: List[Dict], *args, **kwargs) ->Lis
     for idx, document in enumerate(documents):
         document_id = document['document_id']
         if idx % 100 == 0:
-            print(f'{idx + 1}/{count}')
+            print(f'embedding ... {idx + 1}/{count}')
         nlp = spacy.load('en_core_web_sm')
         tokens = document['tokens']
     
@@ -153,7 +153,7 @@ def transformToAddEmbeddingByST(documents: List[Dict], *args, **kwargs) ->List[D
     """
     # Specify your transformation logic here
     count = len(documents)
-    print('Documents', count)
+    print('Embeddings By ST Documents count ', count)
 
     model = SentenceTransformer("all-MiniLM-L6-v2")
     
@@ -284,19 +284,22 @@ def start_indexing():
         print("ElasticSearch instance not running. exiting..")
         sys.exit(1)
 
-    es_client = Elasticsearch('http://localhost:9200',request_timeout=20.0)
-
+    
     df = load_data()
     chunk_documents = transformToAddChunk(df)
     lemmatize_documents = transformToAddTokensBySpacyNLP(chunk_documents)
 
-    embedding_documentsBySpecy = transformToAddEmbeddingBySpecy(lemmatize_documents)
-    export_dataToIndex(embedding_documentsBySpecy,index_name="documents_spacy")
+    embedding_documentsBySpacy = transformToAddEmbeddingBySpacy(lemmatize_documents)
+    export_dataToIndex(embedding_documentsBySpacy,index_name="documents_spacy")
 
     embedding_documentsByST = transformToAddEmbeddingByST(lemmatize_documents)
     export_dataToIndex(embedding_documentsByST,index_name="documents_st")
     
     print("Indexing Completed Successfully")
+    es_client = Elasticsearch('http://localhost:9200',request_timeout=20.0)
+    
+    check(index_name="documents_st",es_client)
+    check(index_name="documents_spacy",es_client)
 
 if __name__ == "__main__":
     start_indexing()    

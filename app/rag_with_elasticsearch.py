@@ -73,7 +73,7 @@ class RAGWithElasticSearch(RAGBase):
         return vector
 
     def search(self, query, num_results=5):
-        index_name="documents_specy"
+        index_name="documents_spacy"
         if(isinstance(self.embedder,SentenceTransformer)):
             index_name = "documents_st"
 

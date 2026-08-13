@@ -32,7 +32,7 @@ query:
 live-data:
 	uv run python app/generate_data.py
 
-trigger-pipeline:
+trigger-mage-pipeline:
 	uv run python populate_elasticsearch.py
 
 trigger-offline-pipeline:
