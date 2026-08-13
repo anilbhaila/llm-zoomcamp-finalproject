@@ -3,7 +3,7 @@ import json
 from typing import Dict, List, Union
 
 import numpy as np
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 
 if 'data_exporter' not in globals():
@@ -51,7 +51,7 @@ def export_data(documents: List[Dict[str, Union[Dict, List[int], str]]], *args, 
                     "answer": {"type": "text"},
                     "embedding": {
                         "type": "dense_vector", 
-                        "dims": 96,
+                        "dims": dimensions,
                         "index": True,
                         "similarity": "cosine"
                     },
@@ -70,14 +70,30 @@ def export_data(documents: List[Dict[str, Union[Dict, List[int], str]]], *args, 
 
     count = len(documents)
     print(f'Indexing {count} documents to Elasticsearch index {index_name}')
-    for idx, document in enumerate(documents):
-        if idx % 100 == 0:
-            print(f'{idx + 1}/{count}')
-
+        
+    # 1. Build actions generator/list for the bulk helper
+    bulk_actions = []
+    for document in documents:
+        # Prevent NumPy array conversion crashes
         if isinstance(document['embedding'], np.ndarray):
             document['embedding'] = document['embedding'].tolist()
-
-        es_client.index(index=index_name, document=document)
+            
+        action = {
+            "_index": index_name,
+            "_source": document
+        }
+        bulk_actions.append(action)
+        
+    # 2. Execute bulk insertion in a single optimized pipeline operation
+    print("Sending batch payload to Elasticsearch...")
+    success, errors = helpers.bulk(es_client, bulk_actions)
+    print(f"Successfully indexed {success} documents.")
+    
+    if errors:
+        print(f"Warning: Encounted errors during indexing: {errors}")
+        
+    # 3. Force index refresh so elements are immediately available for search
+    es_client.indices.refresh(index=index_name)
 
     return [d['embedding'] for d in documents[:5]]
 

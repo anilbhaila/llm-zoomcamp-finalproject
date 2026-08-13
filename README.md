@@ -271,6 +271,21 @@ Returned:
 
 Status: Red, that's why indexing is giving error.
 
+To explain why elastic search is crashing
+curl -s "http://localhost:9200/_cluster/allocation/explain?pretty"
+
+
+
+To change the watermark in elastic search.
+curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+{
+  "persistent": {
+    "cluster.routing.allocation.disk.watermark.low": "95%",
+    "cluster.routing.allocation.disk.watermark.high": "98%",
+    "cluster.routing.allocation.disk.watermark.flood_stage": "99%"
+  }
+}'
+
 
 $docker ps --filter "name=elasticsearch"
 
@@ -288,3 +303,6 @@ $docker compose down elasticsearch
 $docker volume rm $(docker volume ls -q | grep es_data)
 $docker compose down -v (to stop containers and destroy any hidden anonymous storage blocks)
 $docker compose up -d elasticsearch
+
+Shorten directory path in terminal:
+$export PS1="> "
