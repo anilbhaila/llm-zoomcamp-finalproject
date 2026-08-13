@@ -60,9 +60,12 @@ def generate_one():
         score = random_score()
         save_feedback(conversation_id, "user", score=score)
 
-def generate_live():
-    print("Starting live data generation (Ctrl+C to stop)...", flush=True)
-    while True:
+def generate_live(duration_seconds = 600):
+    print(f"Starting live data generation for {duration_seconds} secodes...", flush=True)
+      
+    start_time = time.time()
+    end_time = start_time + duration_seconds
+    while time.time() < end_time:
         generate_one()
         time.sleep(1)
 

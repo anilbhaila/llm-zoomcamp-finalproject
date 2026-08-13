@@ -190,7 +190,7 @@ def export_dataToIndex(documents: List[Dict[str, Union[Dict, List[int], str]]], 
         dimensions = len(document.get('embedding'))
         print(f"Dimensions:{dimensions}")
 
-    es_client = Elasticsearch(connection_string, request_timeout=60.0)
+    es_client = Elasticsearch(connection_string)
 
     print(f'Connecting to Elasticsearch at {connection_string}')
 
@@ -226,14 +226,30 @@ def export_dataToIndex(documents: List[Dict[str, Union[Dict, List[int], str]]], 
 
     count = len(documents)
     print(f'Indexing {count} documents to Elasticsearch index {index_name}')
-    for idx, document in enumerate(documents):
-        if idx % 2 == 0:
-            print(f'Indexing.. {idx + 1}/{count}')
-
+    
+    # 1. Build actions generator/list for the bulk helper
+    bulk_actions = []
+    for document in documents:
+        # Prevent NumPy array conversion crashes
         if isinstance(document['embedding'], np.ndarray):
             document['embedding'] = document['embedding'].tolist()
-
-        es_client.index(index=index_name, document=document)
+            
+        action = {
+            "_index": index_name,
+            "_source": document
+        }
+        bulk_actions.append(action)
+        
+    # 2. Execute bulk insertion in a single optimized pipeline operation
+    print("Sending batch payload to Elasticsearch...")
+    success, errors = helpers.bulk(es_client, bulk_actions)
+    print(f"Successfully indexed {success} documents.")
+    
+    if errors:
+        print(f"Warning: Encounted errors during indexing: {errors}")
+        
+    # 3. Force index refresh so elements are immediately available for search
+    es_client.indices.refresh(index=index_name)
 
     return [d['embedding'] for d in documents[:1]]
 
@@ -261,7 +277,8 @@ def check(index_name, es_client):
         print(f"ES Checking = Document count in {index_name}: {result['count']}")
     except Exception as e:
         print(f"ES Checking = Error: {str(e)}")
-def main():
+
+def start_indexing():
     
     if not is_elasticsearch_ready():
         print("ElasticSearch instance not running. exiting..")
@@ -272,14 +289,14 @@ def main():
     df = load_data()
     chunk_documents = transformToAddChunk(df)
     lemmatize_documents = transformToAddTokensBySpacyNLP(chunk_documents)
-    
+
     embedding_documentsBySpecy = transformToAddEmbeddingBySpecy(lemmatize_documents)
-    embedding_documentsByST = transformToAddEmbeddingByST(lemmatize_documents)
-    
-    export_dataToIndex(embedding_documentsByST,index_name="documents_st")
     export_dataToIndex(embedding_documentsBySpecy,index_name="documents_spacy")
+
+    embedding_documentsByST = transformToAddEmbeddingByST(lemmatize_documents)
+    export_dataToIndex(embedding_documentsByST,index_name="documents_st")
     
-    print("Index Created Successfully")
+    print("Indexing Completed Successfully")
 
 if __name__ == "__main__":
-    main()    
+    start_indexing()    

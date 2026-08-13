@@ -241,3 +241,50 @@ $uv cache clean
 
 freed some space and indexing worked.
 $df -h /workspaces  (To check the disk space of codespaces)
+
+I only want to rebuild "steamlit" docker image.
+$docker compose down streamlit
+$docker compose up --build -d streamlit
+
+Elasticsearch indexing is running very slow. Run below curl command to check health of elastic search
+curl -s http://localhost:9200/_cluster/health?pretty
+
+Returned:
+{
+  "cluster_name" : "docker-cluster",
+  "status" : "red",
+  "timed_out" : false,
+  "number_of_nodes" : 1,
+  "number_of_data_nodes" : 1,
+  "active_primary_shards" : 0,
+  "active_shards" : 0,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 1,
+  "unassigned_primary_shards" : 1,
+  "delayed_unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 0.0
+}
+
+Status: Red, that's why indexing is giving error.
+
+
+$docker ps --filter "name=elasticsearch"
+
+$docker logs --tail 50 -f elasticsearch-1
+
+
+Diagnose which index is Broken
+curl -s "http://localhost:9200/_cat/shards?v&h=index,shard,prirep,state,unassigned.reason"
+
+Returned:
+index        shard prirep state      unassigned.reason
+documents_st 0     p      UNASSIGNED INDEX_CREATED
+
+$docker compose down elasticsearch
+$docker volume rm $(docker volume ls -q | grep es_data)
+$docker compose down -v (to stop containers and destroy any hidden anonymous storage blocks)
+$docker compose up -d elasticsearch

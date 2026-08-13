@@ -15,8 +15,8 @@ import numpy as np
 import socket
 import requests
 
-st = SentenceTransformer("all-MiniLM-L6-v2")
 nlp = spacy.load('en_core_web_sm')
+st = SentenceTransformer("all-MiniLM-L6-v2")
 
 def get_elasticsearch_url():
     try:

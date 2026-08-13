@@ -33,7 +33,7 @@ def init_db(drop=False):
                 cur.execute("DROP TABLE IF EXISTS conversations")
 
             cur.execute("""
-                CREATE TABLE conversations (
+                CREATE TABLE IF NOT EXISTS conversations (
                     id SERIAL PRIMARY KEY,
                     question TEXT NOT NULL,
                     answer TEXT NOT NULL,
@@ -59,7 +59,7 @@ def init_feedback():
             cur.execute("DROP TABLE IF EXISTS feedback")
 
             cur.execute("""
-                CREATE TABLE feedback (
+                CREATE TABLE IF NOT EXISTS feedback (
                     id SERIAL PRIMARY KEY,
                     conversation_id INTEGER REFERENCES conversations(id),
                     source TEXT NOT NULL,

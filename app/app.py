@@ -3,12 +3,33 @@ from assistant_with_elasticsearch import create_assistant
 from db_save import save_conversation
 from judge import evaluate_relevance
 from db_feedback import save_feedback
+from db_init import init_db, init_feedback
+from generate_data import generate_live
+from offline_pipeline import start_indexing
 
 
 st.title("Ecommerce Chatbot")
 
 # Sidebar
 st.sidebar.header("Settings")
+
+# Initialize DB
+if st.sidebar.button("Initialize DB"):
+    init_db()
+    init_feedback()
+    print("Database initialized")
+    st.success("DB Initializion Completed!")
+
+duration_seconds = st.sidebar.selectbox("Duration Seconds", ["60", "600", "1800"])
+if st.sidebar.button("Generate Fake Data"):
+    with st.spinner("Generating Fake Data..."):
+        generate_live(int(duration_seconds))
+        st.success("Generating Success!")
+
+if st.sidebar.button("Trigger Offline Pipeline"):
+    with st.spinner("Indexing..."):
+        start_indexing()
+        st.success("Indexing Success!!")
 
 # Search type  selection
 search_type = st.sidebar.selectbox("Select Search type", ["text", "vector", "hybrid"])
