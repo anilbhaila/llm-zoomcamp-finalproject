@@ -306,3 +306,15 @@ $docker compose up -d elasticsearch
 
 Shorten directory path in terminal:
 $export PS1="> "
+
+Learned about VS Code Docker Dev Container Because my git hub Codespaces free tire is over. I could not continue my project.
+I tired to run docker images in my host machine. But due to my laptop is very old. The software and python libraries doesn't support the CPU architecture.
+Thus, need to find a solution. Though why can't i run my project inside docker.
+
+So, the solution was VS CODE Docker container and Docker within Docker.
+
+If port doesn't forward automatically, you need to forward them.
+1. 3000 => grafana
+2. 5432 => postgres
+3. 6789 => mage
+4. 8501 => steamlit created by docker.

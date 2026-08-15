@@ -298,8 +298,8 @@ def start_indexing():
     print("Indexing Completed Successfully")
     es_client = Elasticsearch('http://localhost:9200',request_timeout=20.0)
     
-    check(index_name="documents_st",es_client)
-    check(index_name="documents_spacy",es_client)
+    check("documents_st",es_client)
+    check("documents_spacy",es_client)
 
 if __name__ == "__main__":
     start_indexing()    

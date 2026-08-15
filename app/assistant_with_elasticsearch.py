@@ -15,8 +15,7 @@ import numpy as np
 import socket
 import requests
 
-nlp = spacy.load('en_core_web_sm')
-st = SentenceTransformer("all-MiniLM-L6-v2")
+
 
 def get_elasticsearch_url():
     try:
@@ -39,9 +38,10 @@ def get_elasticsearch_url():
 
 def create_assistant(search_type="text",embedder_type="Spacy"):
     load_dotenv()
-
+    nlp = spacy.load('en_core_web_sm')
     embedder = nlp
     if embedder_type=="SentenceTransformer":
+        st = SentenceTransformer("all-MiniLM-L6-v2")
         embedder=st
 
     es_client = Elasticsearch(get_elasticsearch_url())

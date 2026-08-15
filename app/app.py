@@ -26,16 +26,16 @@ if st.sidebar.button("Generate Fake Data"):
         generate_live(int(duration_seconds))
         st.success("Generating Success!")
 
-if st.sidebar.button("Trigger Offline Pipeline"):
-    with st.spinner("Indexing..."):
-        start_indexing()
-        st.success("Indexing Success!!")
 
 # Search type  selection
 search_type = st.sidebar.selectbox("Select Search type", ["text", "vector", "hybrid"])
+
+# Embedder type
 embedder_type = st.sidebar.selectbox("Select Embedder type", ["Spacy", "SentenceTransformer"])
+
+# Creating assistant
 assistant = create_assistant(search_type,embedder_type)
-    
+
 user_input = st.text_input("Enter your question:")
 
 if st.button("Ask"):
