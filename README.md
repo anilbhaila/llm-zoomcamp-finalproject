@@ -136,7 +136,7 @@ MAGE_TRIGGER_URL=http://127.0.0.1:6789/api/pipeline_schedules/1/pipeline_runs/4c
   ![Grafana 6 Monitor Data Analytics](/images/Grafana6.png)
 
 ## 4 Evaluation
-* Retrieval Evaluation: Evaluation of Ground Truth for both Spacy Embedder and Sentence Transformer embedder are done in evaluate_retrieval.ipynb(https://github.com/anilbhaila/llm-zoomcamp-finalproject/blob/main/notebook/evaluate_retrieval.ipynb)
+* Retrieval Evaluation: Evaluation of Ground Truth for both Spacy Embedder and Sentence Transformer embedder are done in [evaluate_retrieval.ipynb](https://github.com/anilbhaila/llm-zoomcamp-finalproject/blob/main/notebook/evaluate_retrieval.ipynb)
 
   ![Evaluation1 Spacy](/images/Evaluation1.png)
   
