@@ -71,23 +71,23 @@ MAGE_TRIGGER_URL=http://127.0.0.1:6789/api/pipeline_schedules/1/pipeline_runs/4c
 ### Step 6: Creating Mage API Trigger
 * visit Mage and create API Trigger. Copy that Trigger URL and paste it in .env file described in Step 3.
   
-  ![Create Trigger Image 1]()
+  ![Create Trigger Image 1](/images/CreateTrigger1.png)
   
-  ![Create Trigger Image 2]()
+  ![Create Trigger Image 2](/images/CreateTrigger2.png)
 
-  ![Create Trigger Image 3]()
+  ![Create Trigger Image 3](/images/CreateTrigger3.png)
 
 ### Step 7: Triggering Mage Pipeline to ingest, transform and create index in elastic search
 * Run below command to trigger mage pipeline and create grafana datasource as well as Ecommerce Chatbot Metrices Dashboard.
 ```make trigger-mage-pipeline```
 
-   ![Pipeline Triggered 1]()
+   ![Pipeline Triggered 1](/images/Pipeline1.png)
 
-   ![Pipeline Triggered 2]()
+   ![Pipeline Triggered 2](/images/Pipeline2.png)
 
-   ![Pipeline Triggered 3]()
+   ![Pipeline Triggered 3](/images/Pipeline3.png)
 
-   ![Pipeline Triggered 4]()
+   ![Pipeline Triggered 4](/images/Pipeline4.png)
 
 * Mage Pipeline Explanation: Mage Container volume is mapped with host container's volume, so when mage successfully starts running Ecommerce_chatbot folder is automatically created by Mageai.
   	1. pipelines folder contains subfolder populate_elasticsearch which stores metadata.yaml file. This file is generated when i created a pipeline from mage UI. Mage will detect all pipelines already existed in this pipeline folder.
@@ -100,47 +100,47 @@ MAGE_TRIGGER_URL=http://127.0.0.1:6789/api/pipeline_schedules/1/pipeline_runs/4c
 ### Step 8: Testing Ecommerce Chatbot in Streamlit UI
 * visit: http://localhost:8501 .
 * If you found issue running it from docker container, you can use command ```make chat``` to start streamlit UI App. if port 8501 is used up by streamlit docker container, this command will create streamlit on http://localhost:8502
-  ![Streamlit 0 Chatbot UI]()
+  ![Streamlit 0 Chatbot UI](/images/Streamlit0.png)
 
-  ![Streamlit 1 init-db]()
+  ![Streamlit 1 init-db](/images/Streamlit1.png)
 
-  ![Streamlit 2 fake data]()
+  ![Streamlit 2 fake data](/images/Streamlit2.png)
 
-  ![Streamlit 3 text search]()
+  ![Streamlit 3 text search](/images/Streamlit3.png)
 
-  ![Streamlit 4 spacy-vector]()
+  ![Streamlit 4 spacy-vector](/images/Streamlit4.png)
 
-  ![Streamlit 5 st-vector]()
+  ![Streamlit 5 st-vector](/images/Streamlit5.png)
 
-  ![Streamlit 6 spacy-hybrid]()
+  ![Streamlit 6 spacy-hybrid](/images/Streamlit6.png)
 
-  ![Streamlit 7 st-hybrid]()
+  ![Streamlit 7 st-hybrid](/images/Streamlit7.png)
 
-  ![Streamlit 8 user feedback]()
+  ![Streamlit 8 user feedback](/images/Streamlit8.png)
 
 ### Step 9: Monitoring Analytics in Grafana
 * visit: http://localhost:3000 (username:admin password:admin)
 * when you entered command ```make trigger-mage-pipeline```, the grafana dashboard has also been created.
 * Let's verify it. You will see Ecommarce Chatbot Metrices Dashboard and PostgreSQL Data sources already configured.
 * You just need to open PostgreSQL Data source and click Save & test button at the bottom.
-![Grafana 1 Datasource]()
+![Grafana 1 Datasource](/images/Grafana1.png)
 
-  ![Grafana 2 Save & test button]()
+  ![Grafana 2 Save & test button](/images/Grafana2.png)
 
-  ![Grafana 1 Dashboard]()
+  ![Grafana 3 Dashboard](/images/Grafana3.png)
 
-  ![Grafana 3 Dashboard No Data]()
+  ![Grafana 4 Dashboard No Data](/images/Grafana4.png)
 
-  ![Grafana 4 Fake Data Generation]()
+  ![Grafana 5 Fake Data Generation](/images/Grafana5.png)
 
-  ![Grafana 5 Monitor Data Analytics]()
+  ![Grafana 6 Monitor Data Analytics](/images/Grafana6.png)
 
 ## 4 Evaluation
 * Retrieval Evaluation: Evaluation of Ground Truth for both Spacy Embedder and Sentence Transformer embedder are done in evaluate_retrieval.ipynb(https://github.com/anilbhaila/llm-zoomcamp-finalproject/blob/main/notebook/evaluate_retrieval.ipynb)
 
-  ![Evaluation1 Spacy]()
+  ![Evaluation1 Spacy](/images/Evaluation1.png)
   
-  ![Evaluation2 Sentence Transformer]()
+  ![Evaluation2 Sentence Transformer](/images/Evaluation2.png)
   
   
 * Verdict: Sentence Transformer is better and accurate than Spacy.
