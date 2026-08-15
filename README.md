@@ -1,4 +1,4 @@
-# llm-zoomcamp-finalproject: Ecommerce Chatbot
+# llm-zoomcamp-finalproject: Ecommerce Chatbot (Submission Date: Aug 15, 2026)
 ## Problem Description
 In the age of AI, people have no time to scroll through FAQs on any website. So, this is a project that leverage LLM models like GPT-5.0-mini to create interactive chat to find answers from the Ecommerce Website. The project will promptly answer users query if it exist in the website's FAQ section, so that users don't need to scroll through large FAQ page.
 
