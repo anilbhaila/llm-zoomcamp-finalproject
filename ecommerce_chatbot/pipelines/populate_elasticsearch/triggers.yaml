@@ -1,0 +1,14 @@
+triggers:
+- description: null
+  envs: []
+  last_enabled_at: 2026-08-15 02:37:33.750952
+  name: dreamy rune
+  pipeline_uuid: populate_elasticsearch
+  schedule_interval: null
+  schedule_type: api
+  settings: null
+  sla: null
+  start_time: 2026-08-13 21:08:00
+  status: active
+  token: 7c64ae78346e41b7ba0fdb9c8f076f68
+  variables: {}
